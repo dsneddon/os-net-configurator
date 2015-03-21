@@ -1,0 +1,31 @@
+network_config:
+  -
+    type: interface
+    name: nic1
+    use_dhcp: true
+  -
+    type: interface
+    name: nic2
+    use_dhcp: true
+  -
+    type: interface
+    name: nic3
+    addresses:
+      -
+        ip_netmask: ${storage_getaddress_0}
+  -
+    type: interface
+    name: nic4
+      -
+        ip_netmask: ${tenant_getaddress_0}
+  -
+    type: vlan
+    device: em1
+    vlan_id: 104
+    addresses:
+      -
+        ip_netmask: ${external_getaddress_0}
+    routes:
+      -
+        next_hop: ${external_gateway}
+        ip_netmask: ${external_ip_netmask}

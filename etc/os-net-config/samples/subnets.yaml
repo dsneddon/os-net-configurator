@@ -1,0 +1,15 @@
+subnets:
+  -
+    name: external
+    ip_netmask: 10.8.148.0/24
+    gateway: 10.8.148.254
+    host_range: '10.8.148.10, 10.8.148.100'
+  -
+    name: storage
+    ip_netmask: 172.21.4.0/24
+    gateway: 172.21.4.1
+    host_range: '172.21.4.30, 172.21.4.200'
+  -
+    name: tenant
+    ip_netmask: 172.21.5.0/24
+    gateway: 172.21.5.254

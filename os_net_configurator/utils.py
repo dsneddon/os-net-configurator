@@ -1,4 +1,19 @@
+import re
+import logging
 from string import Template
+
+logger = logging.getLogger(__name__)
+
+def tokenize_template(template):
+    """Extract out the tokens from a yaml template
+
+    :param template: The os-net-config template with tokens to be replaced
+    :return list: Returns a list of the tokens in the template
+    """
+    token = re.compile('\$\{.*\}')
+    token_match = token.findall(template)
+    logger.debug('Tokens matched: %s' % token_match)
+    return token_match
 
 def process_template(template, replacements):
     """Perform string.template substitution based on the replacement dict.
@@ -20,14 +35,19 @@ def replace_token(subnets, token_keys):
     """
     if len(token_keys) > 5:
         # Subnet referenced in the form 10_0_0_0_8 rather than by name
-        subnet_ip_netmask = '.'.join(token_keys[0:4])
-        print "Subnet ip_netmask: %s" % subnet_ip_netmask
+        # TODO: Figure out why replacements not working in IP form
+        subnet_ref = '.'.join(token_keys[0:4]) + '/' + token_keys[4]
+        token_keys_ip = token_keys
+        token_keys = [subnet_ref]
+        for token in token_keys_ip[5:]:
+            token_keys.append(token)
+            print "token_keys: %s" % token_keys
 
     for subnet in subnets:
-        token_subnet = token_keys[0]
-        if token_subnet == subnet.name:
+        if (token_keys[0] == subnet.name) or\
+            (token_keys[0] == subnet.ip_netmask):
             if token_keys[1] == "getaddress":
-                return subnet.get_address(int(token_keys[2]))
+                return subnet.get_ip_netmask(int(token_keys[2]))
             if (token_keys[1] == "ip") and (token_keys[2] == "netmask"):
                 return getattr(subnet, token_keys[1] + '_' + token_keys[2])
             else:

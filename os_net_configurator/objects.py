@@ -18,7 +18,7 @@ class Subnet(object):
         :param gateway: IP of the subnet gateway, *defaults to last host IP*.
         :param host_range: Host IP range. Defaults to IPRange(first+1, last-1).
         """
-        self.ip_netmask = ip_netmask
+        self.ip_netmask = str(ip_netmask)
         self.network = netaddr.IPNetwork(ip_netmask)
         logger.debug('Name: %s' % name)
         if name:
@@ -36,7 +36,7 @@ class Subnet(object):
         args = {}
         for key, value in kwargs.iteritems():
             args[key] = value
-        if args["gateway"]:
+        if "gateway" in args:
             self.gateway = args["gateway"]
         else:
             self.gateway = str(self.network[-2])
@@ -46,14 +46,15 @@ class Subnet(object):
         else:
             self.host_range = netaddr.IPRange(str(self.network[1]),
                                               str(self.network[-2]))
-        logger.info('Subnet created with host_range: %s' % repr(self.host_range))
+        logger.info('Subnet created with host_range: %s' %
+                    repr(self.host_range))
         for key, value in kwargs.iteritems():
             self.key = value
 
     def network_ip(self):
         return str(self.network.ip)
 
-    def get_address(self, index, type="compute"):
+    def get_ip_netmask(self, index):
         """Returns the <index>th Subnet address, or None if out of range.
 
         :param index: the index position of the address to retrieve
@@ -64,8 +65,10 @@ class Subnet(object):
                        str(self.network.prefixlen)
             return __retval
         except Exception as e:
-            print e
-            raise IPIndexError('index out of range for address range size!')
+            logger.error("ip_netmask index %s out of range for subnet %s"
+                         % (index, self.name))
+            raise IPIndexError('Index %s out of range for subnet %s'
+                               % (index, self.name))
 
 class IPv4Address(netaddr.IPAddress):
     """Subclass for IPv4 Addresses"""

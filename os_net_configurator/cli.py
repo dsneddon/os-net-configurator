@@ -3,7 +3,6 @@ import logging
 import os
 import sys
 import yaml
-import re
 import objects
 import utils
 
@@ -69,26 +68,24 @@ def main(argv=sys.argv):
 
     if os.path.exists(opts.subnets_file):
         with open(opts.subnets_file) as sf:
-            subnet_json = yaml.load(sf.read()).get("subnets")
-            logger.debug('subnets JSON: %s' % str(subnet_json))
+            subnet_yaml = yaml.load(sf.read()).get("subnets")
+            logger.debug('subnets JSON: %s' % str(subnet_yaml))
     else:
         logger.error('No config file exists at: %s' % opts.subnets_file)
         return 1
-    if not isinstance(subnet_json, list):
+    if not isinstance(subnet_yaml, list):
         logger.error('No subnets defined in file: %s' % opts.subnets_file)
         return 1
     if os.path.exists(opts.template_file):
         with open(opts.template_file) as tf:
             template_raw = tf.read()
-            token = re.compile('\$\{.*\}')
-            token_match = token.findall(template_raw)
-            logger.debug('Tokens matched: %s' % token_match)
+            token_match = utils.tokenize_template(template_raw)
     else:
         logger.error('No config file exists at: %s' % opts.subnets_file)
         return 1
     subnets = []
     subnet_name = ""
-    for subnet in subnet_json:
+    for subnet in subnet_yaml:
         kwargs = {}
         if "name" in subnet:
             subnet_name = subnet["name"]
@@ -111,9 +108,7 @@ def main(argv=sys.argv):
         token_keys = token_raw.split('_')
         for i in range(0, len(token_keys)):
             token_keys[i] = token_keys[i].strip()
-        for subnet in subnets:
-            if token_keys[0] == subnet.name:
-                replacements[token_raw] = utils.replace_token(subnets, token_keys)
+        replacements[token_raw] = utils.replace_token(subnets, token_keys)
     logger.debug('Field token replacements: %s' % replacements)
     rendered_config = utils.process_template(template_raw, replacements)
     if opts.noop:

@@ -13,7 +13,7 @@ Features
 --------
 
 The core aim of this project is to produce a template for os-net-config with
-unique IP addresses based on an index provided by Heat ResourceGroup. The
+unique IP addresses based on an index provided by a Heat ResourceGroup. The
 project consists of:
 
  * A CLI (os-net-configurator) which provides an interface to process a file
@@ -25,8 +25,35 @@ project consists of:
 
 YAML Config Examples
 --------------------
- * Configure two interfaces, one with dhcp and one with a static IP
+ * Configure two interfaces, one with dhcp and one with a static IP and a route.
+ * This will result in a host config where the second NIC on the host will get
+   an IP address of 172.21.5.10 (tenant_getaddress_0 will retrieve the first IP
+   in the host_range) and the gateway of 172.21.5.254 for the static route.
 
 .. code-block:: yaml
 
   network_config:
+  -
+    type: interface
+    name: nic1
+    use_dhcp: true
+  -
+    type: interface
+    name: nic2
+    addresses:
+      -
+        ip_netmask: ${tenant_getaddress_0}
+    routes:
+      -
+        next_hop: ${tenant_gateway}
+        ip_netmask: 10.0.1.0/24
+
+.. code-block:: yaml
+
+  subnets:
+    -
+      name: tenant
+      ip_netmask: 172.21.5.0/24
+      gateway: 172.21.5.254
+      host_range: 172.21.5.10, 172.21.5.100
+

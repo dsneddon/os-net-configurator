@@ -109,7 +109,7 @@ def main(argv=sys.argv):
     for token in token_match:
         token_raw = token.strip("$|{|}|")
         token_keys = token_raw.split('_')
-        for i in range(0,len(token_keys)):
+        for i in range(0, len(token_keys)):
             token_keys[i] = token_keys[i].strip()
         for subnet in subnets:
             if token_keys[0] == subnet.name:

@@ -33,20 +33,20 @@ YAML Config Examples
 .. code-block:: yaml
 
   network_config:
-  -
-    type: interface
-    name: nic1
-    use_dhcp: true
-  -
-    type: interface
-    name: nic2
-    addresses:
-      -
-        ip_netmask: ${tenant_getaddress_0}
-    routes:
-      -
-        next_hop: ${tenant_gateway}
-        ip_netmask: 10.0.1.0/24
+    -
+      type: interface
+      name: nic1
+      use_dhcp: true
+    -
+      type: interface
+      name: nic2
+      addresses:
+        -
+          ip_netmask: ${tenant_getaddress_0}
+      routes:
+        -
+          next_hop: ${tenant_gateway}
+          ip_netmask: 10.0.1.0/24
 
 .. code-block:: yaml
 
@@ -56,4 +56,3 @@ YAML Config Examples
       ip_netmask: 172.21.5.0/24
       gateway: 172.21.5.254
       host_range: 172.21.5.10, 172.21.5.100
-

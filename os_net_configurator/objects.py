@@ -16,7 +16,7 @@ class Subnet(object):
         :param network: Network/mask ('10.0.0.0/8' or '10.0.0.0/255.0.0.0').
         :param name: The name of the subnet (used for template matching).
         :param gateway: IP of the subnet gateway, *defaults to last host IP*.
-        :param host_range: Host IP range. Defaults to IPRange(first+1, last-1).
+        :param host_range: Host IP range. Default: IPRange(first+1, last-1).
         """
         self.ip_netmask = str(ip_netmask)
         self.network = netaddr.IPNetwork(ip_netmask)
@@ -44,7 +44,7 @@ class Subnet(object):
             begin, end = args["host_range"].split(',')
             self.host_range = netaddr.IPRange(begin.strip(), end.strip())
         else:
-            self.host_range = netaddr.IPRange(str(self.network[1]),
+            self.host_range = netaddr.IPRange(str(self.network[2]),
                                               str(self.network[-2]))
         logger.info('Subnet created with host_range: %s' %
                     repr(self.host_range))
@@ -54,7 +54,7 @@ class Subnet(object):
     def network_ip(self):
         return str(self.network.ip)
 
-    def get_ip_netmask(self, index):
+    def address(self, index):
         """Returns the <index>th Subnet address, or None if out of range.
 
         :param index: the index position of the address to retrieve

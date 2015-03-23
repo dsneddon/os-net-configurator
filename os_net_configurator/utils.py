@@ -1,4 +1,5 @@
 import re
+import objects
 import logging
 from string import Template
 
@@ -25,6 +26,14 @@ def process_template(template, replacements):
     template_obj = Template(template)
     return template_obj.safe_substitute(replacements)
 
+def token_query(subnet, token_keys):
+    if token_keys[1] == "address":
+        return subnet.address(int(token_keys[2]))
+    elif (token_keys[1] == "ip") and (token_keys[2] == "netmask"):
+        return getattr(subnet, token_keys[1] + '_' + token_keys[2])
+    else:
+        return getattr(subnet, token_keys[1].strip())
+
 def replace_token(subnets, token_keys):
     """Replace field tokens with values
 
@@ -33,25 +42,25 @@ def replace_token(subnets, token_keys):
                        "<subnet>_<method>_<parameter>"
     :return: replacement
     """
+    token_processed = False
+    token_keys_ip = False
     if len(token_keys) > 5:
-        # Subnet referenced in the form 10_0_0_0_8 rather than by name
-        # TODO: Figure out why replacements not working in IP form
-        subnet_ref = '.'.join(token_keys[0:4]) + '/' + token_keys[4]
+        # Subnet referenced in the form IP10_0_0_0_8 rather than by name
+        subnet_ref = token_keys[0].strip('IP') + '.'
+        subnet_ref += '.'.join(token_keys[1:4]) + '/' + token_keys[4]
         token_keys_ip = token_keys
         token_keys = [subnet_ref]
         for token in token_keys_ip[5:]:
             token_keys.append(token)
-            print "token_keys: %s" % token_keys
 
     for subnet in subnets:
         if (token_keys[0] == subnet.name) or\
-            (token_keys[0] == subnet.ip_netmask):
-            if token_keys[1] == "getaddress":
-                return subnet.get_ip_netmask(int(token_keys[2]))
-            if (token_keys[1] == "ip") and (token_keys[2] == "netmask"):
-                return getattr(subnet, token_keys[1] + '_' + token_keys[2])
-            else:
-                return getattr(subnet, token_keys[1].strip())
+                (token_keys[0] == subnet.ip_netmask):
+            return token_query(subnet, token_keys)
+    if token_keys_ip:
+        # Subnet referenced not found, create subnet and process query
+        new_subnet = objects.Subnet(subnet_ref, name="")
+        return token_query(new_subnet, token_keys)
 
 def write_output_file(path, data):
     """Write the os-net-config configuration to a file specified by :path.

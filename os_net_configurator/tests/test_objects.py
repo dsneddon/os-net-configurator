@@ -16,11 +16,11 @@ class TestSubnet(base.TestCase):
                           subnet2.network)
         self.assertEquals(network_broadcast, str(subnet2.network.broadcast))
         self.assertEquals(23, subnet2.network.prefixlen)
-        self.assertEquals("192.168.2.1/23", subnet2.get_ip_netmask(0))
+        self.assertEquals("192.168.2.1/23", subnet2.address(0))
         self.assertEquals("192.168.3.254", subnet2.gateway)
-        self.assertEquals("192.168.3.0/23", subnet2.get_ip_netmask(255))
-        self.assertRaises(ValueError, subnet2.get_ip_netmask, 511)
-        self.assertEquals("192.168.3.254/23", subnet2.get_ip_netmask(-1))
+        self.assertEquals("192.168.3.0/23", subnet2.address(255))
+        self.assertRaises(ValueError, subnet2.address, 511)
+        self.assertEquals("192.168.3.254/23", subnet2.address(-1))
 
     def test_Subnet_range(self):
         network = netaddr.IPNetwork("192.168.2.0/23")
@@ -29,7 +29,7 @@ class TestSubnet(base.TestCase):
         self.assertEquals(netaddr.IPNetwork("192.168.2.0/23"),
                           subnet2.network)
         self.assertEquals("192.168.2.0/23", subnet2.ip_netmask)
-        self.assertEquals("192.168.2.10/23", subnet2.get_ip_netmask(0))
+        self.assertEquals("192.168.2.10/23", subnet2.address(0))
 
     def test_IPv4Address(self):
         address = objects.IPv4Address("192.168.1.1")

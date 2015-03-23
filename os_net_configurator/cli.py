@@ -71,8 +71,8 @@ def main(argv=sys.argv):
             subnet_yaml = yaml.load(sf.read()).get("subnets")
             logger.debug('subnets JSON: %s' % str(subnet_yaml))
     else:
-        logger.error('No config file exists at: %s' % opts.subnets_file)
-        return 1
+        logger.warning('No config file exists at: %s' % opts.subnets_file)
+        subnet_yaml = ''
     if not isinstance(subnet_yaml, list):
         logger.error('No subnets defined in file: %s' % opts.subnets_file)
         return 1
@@ -83,6 +83,8 @@ def main(argv=sys.argv):
     else:
         logger.error('No config file exists at: %s' % opts.subnets_file)
         return 1
+
+    # Create subnets
     subnets = []
     subnet_name = ""
     for subnet in subnet_yaml:
@@ -101,6 +103,7 @@ def main(argv=sys.argv):
         logger.debug('Subnets created from config file:')
         logger.debug('Subnet created: "%s": %s' %
                      (obj.name, repr(obj.network)))
+    #
     replacements = {}
     # extract the $var or ${var} token values and get replacement values
     for token in token_match:
